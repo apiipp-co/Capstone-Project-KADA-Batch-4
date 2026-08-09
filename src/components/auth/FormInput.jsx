@@ -16,7 +16,7 @@ export default function FormInput({
   return (
     <div className={className}>
       <div className="mb-2 flex min-h-5 items-center justify-between gap-4">
-        <label htmlFor={id} className="text-sm font-semibold text-[#20232D]">
+        <label htmlFor={id} className="text-xs font-semibold text-[#20232D]">
           {label}
         </label>
         {labelAction}
@@ -36,7 +36,7 @@ export default function FormInput({
           aria-invalid={Boolean(error)}
           aria-describedby={errorId}
           className={cn(
-            "h-14 w-full rounded-[10px] border bg-white text-sm text-[#20232D] shadow-[0_1px_3px_rgba(30,42,75,0.04)] transition placeholder:text-[#B9C0D1] focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50",
+            "h-12 w-full rounded-[10px] border bg-white text-sm text-[#20232D] shadow-[0_1px_3px_rgba(30,42,75,0.04)] transition placeholder:text-[#B9C0D1] focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50",
             Icon ? "pl-11" : "pl-4",
             endAction ? "pr-12" : "pr-4",
             error

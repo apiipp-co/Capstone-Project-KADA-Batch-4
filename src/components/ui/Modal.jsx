@@ -54,7 +54,10 @@ export default function Modal({
     };
     document.addEventListener("keydown", handleKeyDown);
     document.body.style.overflow = "hidden";
-    requestAnimationFrame(() => initialFocusRef?.current?.focus() || panelRef.current?.focus());
+    requestAnimationFrame(() => {
+      if (initialFocusRef?.current) initialFocusRef.current.focus();
+      else panelRef.current?.focus();
+    });
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
@@ -79,7 +82,10 @@ export default function Modal({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         onMouseDown={(event) => event.stopPropagation()}
-        className={cn("w-full max-w-md rounded-2xl bg-white p-6 shadow-card", panelClassName)}
+        className={cn(
+          "max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-card outline-none",
+          panelClassName,
+        )}
       >
         <div className="flex items-start justify-between gap-4">
           <div>

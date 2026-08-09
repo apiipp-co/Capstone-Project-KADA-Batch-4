@@ -5,7 +5,7 @@ const SIDEBAR_KEY = "edutrack_sidebar_collapsed";
 function initialCollapsed() {
   const saved = localStorage.getItem(SIDEBAR_KEY);
   if (saved !== null) return saved === "true";
-  return window.innerWidth < 1100;
+  return window.innerWidth < 1024;
 }
 
 export function useLayoutStore() {

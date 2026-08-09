@@ -17,7 +17,7 @@ export default function ReportFilters({ filters, onChange, onShow, loading }) {
 
   return (
     <section aria-label="Filter rapor" className="mt-7 rounded-[14px] border border-[#E4E8F1] bg-white p-4 shadow-[0_2px_8px_rgba(30,42,75,0.05)]">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1.1fr_1.2fr_1.2fr_1fr_auto] lg:items-end">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(160px,0.85fr)_minmax(220px,1.25fr)_minmax(200px,1fr)_minmax(180px,0.9fr)_auto] xl:items-end">
         <Select label="Kelas" value={filters.classId} onChange={changeClass} disabled={loading}>
           {teacherUser.assignedClasses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
         </Select>
@@ -36,13 +36,12 @@ export default function ReportFilters({ filters, onChange, onShow, loading }) {
           title="Tampilkan daftar rapor"
           onClick={onShow}
           disabled={loading}
-          className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-[#0756D9] text-white shadow-sm transition hover:bg-[#0648B8] disabled:opacity-60 lg:w-10"
+          className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-[#0756D9] text-white shadow-sm transition hover:bg-[#0648B8] disabled:opacity-60 sm:col-span-2 xl:col-span-1 xl:w-10"
         >
           <Search aria-hidden="true" className="h-5 w-5" />
-          <span className="ml-2 lg:sr-only">Tampilkan daftar rapor</span>
+          <span className="ml-2 xl:sr-only">Tampilkan daftar rapor</span>
         </button>
       </div>
     </section>
   );
 }
-

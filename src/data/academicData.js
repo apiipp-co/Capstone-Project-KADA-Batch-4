@@ -1,5 +1,5 @@
 export const academicPeriod = {
   semester: "Ganjil",
-  academicYear: "2026/2027",
+  academicYear: "2023/2024",
   week: 8,
 };

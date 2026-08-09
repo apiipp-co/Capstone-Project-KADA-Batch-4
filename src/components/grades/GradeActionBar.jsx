@@ -32,7 +32,7 @@ export default function GradeActionBar({
         {isEditing ? (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <Button ref={topicButtonRef} variant="secondary" onClick={onOpenTopics} disabled={isSaving} className="h-11 border-[#0756D9] text-[#0756D9]">
-              <BookOpen aria-hidden="true" className="h-4 w-4" /> Input Materi
+              <BookOpen aria-hidden="true" className="h-4 w-4" /> Input Materi Pembelajaran
             </Button>
             <Button variant="secondary" onClick={onCancel} disabled={isSaving} className="h-11 border-[#0756D9] text-[#0756D9]">Batal</Button>
             <Button onClick={onSave} loading={isSaving} disabled={!isDirty || isSaving} className="h-11 min-w-[190px]">
@@ -42,7 +42,7 @@ export default function GradeActionBar({
           </div>
         ) : (
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Button variant="secondary" onClick={onEdit} className="h-11 border-[#0756D9] text-[#0756D9]">Edit Data</Button>
+            <Button variant="secondary" onClick={onEdit} className="h-11 border-[#0756D9] text-[#0756D9]">Edit Nilai</Button>
             <div role="status" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#10B981] px-6 text-sm font-semibold text-white shadow-sm">
               <Save aria-hidden="true" className="h-4 w-4" /> Nilai Tersimpan
             </div>

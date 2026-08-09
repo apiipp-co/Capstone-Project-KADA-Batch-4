@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import { Eye, EyeOff, IdCard, LockKeyhole } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import { login } from "../services/authService";
 import { setAuthSession } from "../stores/authStore";
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email institusi wajib diisi.").email("Format email tidak valid."),
+  username: z.string().trim().min(1, "Username wajib diisi."),
   password: z
     .string()
     .min(1, "Kata sandi wajib diisi.")
@@ -20,7 +20,14 @@ const loginSchema = z.object({
 });
 
 const AUTH_ERROR_MESSAGE =
-  "Email atau kata sandi salah. Silakan periksa kembali atau hubungi admin IT sekolah.";
+  "Username/password salah.";
+
+const dashboardByRole = {
+  superadmin: "/superadmin/dashboard",
+  admin: "/admin/dashboard",
+  teacher: "/teacher/dashboard",
+  student: "/student/dashboard",
+};
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -35,7 +42,7 @@ export default function LoginPage() {
   } = useForm({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
-    defaultValues: { email: "", password: "" },
+    defaultValues: { username: "", password: "" },
   });
 
   const clearAuthError = () => {
@@ -49,7 +56,7 @@ export default function LoginPage() {
     try {
       const session = await login(values);
       setAuthSession(session.user, session.token);
-      const fallback = session.user.role === "teacher" ? "/teacher/dashboard" : "/dashboard";
+      const fallback = dashboardByRole[session.user.role] || "/login";
       const requestedPath = location.state?.from;
       navigate(requestedPath || fallback, { replace: true });
     } catch {
@@ -65,15 +72,15 @@ export default function LoginPage() {
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-[18px]">
         <FormInput
-          id="email"
-          label="Email Institusi"
-          icon={Mail}
-          type="email"
+          id="username"
+          label="Username"
+          icon={IdCard}
+          type="text"
           autoComplete="username"
-          placeholder="nama@sekolah.edu"
+          placeholder="123456"
           disabled={isSubmitting}
-          error={errors.email?.message}
-          register={register("email", { onChange: clearAuthError })}
+          error={errors.username?.message}
+          register={register("username", { onChange: clearAuthError })}
         />
 
         <FormInput
@@ -120,7 +127,7 @@ export default function LoginPage() {
           type="submit"
           loading={isSubmitting}
           disabled={!isValid || isSubmitting}
-          className={authError ? "!mt-6 w-full" : "!mt-[26px] w-full"}
+          className={authError ? "!mt-6 h-11 w-full" : "!mt-[26px] h-11 w-full"}
         >
           {isSubmitting ? "Memproses..." : "Masuk ke Dashboard"}
         </Button>

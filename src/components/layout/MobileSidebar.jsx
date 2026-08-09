@@ -1,9 +1,10 @@
 import { X } from "lucide-react";
 import logo from "../../assets/logo-edutrack.svg";
 import SidebarItem from "./SidebarItem";
-import { navigationItems } from "./Sidebar";
+import { getNavigationItems } from "./Sidebar";
 
 export default function MobileSidebar({ open, onClose }) {
+  const navigationItems = getNavigationItems();
   return (
     <div className={`fixed inset-0 z-[70] md:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open}>
       <button

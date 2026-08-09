@@ -284,17 +284,10 @@ export default function TeacherGradesPage() {
     }
   };
 
-  const scrollToInputArea = () => {
-    document.getElementById(sheet ? "grade-table-section" : "grade-filter-section")?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  };
-
   return (
-    <div className="px-4 py-8 sm:px-7 lg:px-10">
+    <div className="px-4 py-8 sm:px-7 lg:px-6 xl:px-10">
       <div className="mx-auto max-w-[1100px]">
-        <GradePageHeader onInputClick={scrollToInputArea} />
+        <GradePageHeader />
         <div id="grade-filter-section">
           <GradeFilters
             filters={filters}

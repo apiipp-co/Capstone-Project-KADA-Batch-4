@@ -25,3 +25,16 @@ export const teacherUser = {
     },
   ],
 };
+
+export const homeroomTeacherUser = {
+  ...teacherUser,
+  id: "TCH-002",
+  name: "Budi Santoso",
+  displayName: "Pak Budi",
+  email: "walikelas@sekolah.edu",
+  isHomeroomTeacher: true,
+  homeroomClass: {
+    id: "CLS-001",
+    name: "X-MIPA 1",
+  },
+};

@@ -1,24 +1,51 @@
 import {
+  BarChart3,
   CalendarCheck,
   ChevronLeft,
   ChevronRight,
   FileChartColumn,
+  FileText,
   FilePenLine,
   LayoutGrid,
+  Settings,
   UserRound,
 } from "lucide-react";
 import logo from "../../assets/logo-edutrack.svg";
+import { getStoredUser } from "../../stores/authStore";
 import SidebarItem from "./SidebarItem";
 
-export const navigationItems = [
-  { to: "/teacher/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { to: "/teacher/attendance", label: "Presensi", icon: CalendarCheck },
-  { to: "/teacher/grades", label: "Input Nilai", icon: FilePenLine },
-  { to: "/teacher/reports", label: "Generate Rapor", icon: FileChartColumn },
-  { to: "/teacher/account", label: "Akun", icon: UserRound },
-];
+export function getNavigationItems(user = getStoredUser()) {
+  if (user?.role === "student") {
+    return [
+      { to: "/student/dashboard", label: "Dashboard", icon: LayoutGrid },
+      { to: "/student/grades", label: "Nilai", icon: BarChart3 },
+      { to: "/student/report", label: "Rapor", icon: FileText },
+      { to: "/student/settings", label: "Pengaturan", icon: Settings },
+    ];
+  }
+
+  if (user?.role === "admin") {
+    return [{ to: "/admin/dashboard", label: "Dashboard", icon: LayoutGrid }];
+  }
+
+  return [
+    { to: "/teacher/dashboard", label: "Dashboard", icon: LayoutGrid },
+    { to: "/teacher/attendance", label: "Presensi", icon: CalendarCheck },
+    { to: "/teacher/grades", label: "Input Nilai", icon: FilePenLine },
+    ...(user?.isHomeroomTeacher
+      ? [{ to: "/teacher/subject-grades", label: "Lihat Nilai Mapel", icon: BarChart3 }]
+      : []),
+    {
+      to: "/teacher/reports",
+      label: user?.isHomeroomTeacher ? "Buat Rapor" : "Generate Rapor",
+      icon: FileChartColumn,
+    },
+    { to: "/teacher/account", label: "Akun", icon: UserRound },
+  ];
+}
 
 export default function Sidebar({ collapsed, onToggle }) {
+  const navigationItems = getNavigationItems();
   return (
     <aside
       className={`fixed inset-y-0 left-0 z-40 hidden border-r border-[#DCE1EB] bg-white transition-[width] duration-200 md:flex md:flex-col ${

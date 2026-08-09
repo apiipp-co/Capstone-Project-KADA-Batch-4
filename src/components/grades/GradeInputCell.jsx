@@ -15,7 +15,7 @@ export default function GradeInputCell({ student, component, value, error, disab
         aria-label={`Nilai ${component.fullName} ${student.name}`}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
-        className={`h-11 w-16 rounded-lg border bg-white px-2 text-center text-sm text-[#20232D] transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50 ${
+        className={`h-10 w-12 rounded-lg border bg-white px-1 text-center text-sm text-[#20232D] transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50 ${
           error
             ? "border-red-500 focus:border-red-500 focus:ring-red-100"
             : "border-[#DDE2EC] focus:border-[#0756D9] focus:ring-blue-100"

@@ -5,7 +5,7 @@ import Select from "../ui/Select";
 function FilterField({ label, children }) {
   return (
     <div className="min-w-0">
-      <p className="mb-1.5 px-1 text-xs font-medium text-[#4B5060]">{label}</p>
+      <p className="mb-1.5 px-1 text-[11px] font-medium text-[#4B5060]">{label}</p>
       {children}
     </div>
   );
@@ -27,7 +27,7 @@ export default function GradeFilters({ filters, onChange, onShow, loading }) {
 
   return (
     <section className="mt-8 rounded-[14px] border border-[#E4E8F1] bg-white p-4 shadow-[0_2px_5px_rgba(30,42,75,0.04)]">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[130px_160px_1fr_140px_auto] lg:items-end">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(160px,0.9fr)_minmax(190px,1fr)_minmax(220px,1.3fr)_minmax(150px,0.8fr)_auto] xl:items-end [&_select]:text-xs">
         <FilterField label="Tahun Ajaran">
           <Select label="Tahun Ajaran" value={filters.academicYear} onChange={keepAssignedOption} disabled={loading}>
             <option value="2026/2027">2026/2027</option>
@@ -60,7 +60,7 @@ export default function GradeFilters({ filters, onChange, onShow, loading }) {
           type="button"
           onClick={onShow}
           disabled={loading}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#2F67ED] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1451D2] disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2 lg:col-span-1"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#2F67ED] px-5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#1451D2] disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2 xl:col-span-1"
         >
           <Search aria-hidden="true" className="h-4 w-4" /> Tampilkan
         </button>

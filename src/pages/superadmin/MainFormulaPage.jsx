@@ -1,0 +1,114 @@
+import { CheckCircle2, Sigma } from "lucide-react";
+import Badge from "../../components/ui/Badge";
+import { formulaCategoryColors, mainFormula } from "../../data/superAdminManagementData";
+
+const CATEGORY_ORDER = ["UAS", "UTS", "Ulangan Harian", "Tugas"];
+
+export default function MainFormulaPage() {
+  const totalWeight = mainFormula.components.reduce((total, component) => total + component.weight, 0);
+  const isValid = totalWeight === 100;
+  const categoryWeights = mainFormula.components.reduce((totals, component) => ({
+    ...totals,
+    [component.category]: (totals[component.category] || 0) + component.weight,
+  }), {});
+
+  let currentOffset = 0;
+  const donutGradient = `conic-gradient(${CATEGORY_ORDER.map((category) => {
+    const start = currentOffset;
+    currentOffset += categoryWeights[category] || 0;
+    return `${formulaCategoryColors[category]} ${start}% ${currentOffset}%`;
+  }).join(", ")})`;
+
+  return (
+    <main className="mx-auto w-full max-w-[1160px] px-4 py-8 sm:px-6 lg:px-8">
+      <header>
+        <h1 className="text-3xl font-bold tracking-[-0.035em] text-[#20232D]">Manajemen Rumus</h1>
+        <p className="mt-2 text-base text-[#555D6E]">Konfigurasi bobot penilaian dan komponen evaluasi.</p>
+      </header>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.85fr)_minmax(280px,0.9fr)] lg:items-start">
+        <section className="overflow-hidden rounded-lg border border-[#C8D0DF] bg-white shadow-[0_1px_3px_rgba(30,42,75,0.04)]" aria-labelledby="formula-name">
+          <div className="flex flex-col gap-4 border-b border-[#D7DCE7] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[#E8EFFF] text-[#173A75]">
+                <Sigma aria-hidden="true" className="h-6 w-6" />
+              </span>
+              <div>
+                <h2 id="formula-name" className="text-base font-medium text-[#20232D]">{mainFormula.name}</h2>
+                <p className="mt-1 text-sm text-[#555D6E]">Diterapkan ke: {mainFormula.appliedTo.join(", ")}</p>
+              </div>
+            </div>
+            <Badge className="self-start bg-emerald-50 font-medium uppercase text-emerald-600 sm:self-auto">
+              <span aria-hidden="true">●</span> {mainFormula.status === "active" ? "Aktif" : "Tidak Aktif"}
+            </Badge>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px] border-collapse text-left">
+              <thead className="bg-[#F4F5F7] text-sm font-semibold uppercase tracking-wide text-[#4D5362]">
+                <tr>
+                  <th scope="col" className="px-5 py-4">Komponen</th>
+                  <th scope="col" className="w-48 px-5 py-4">Bobot</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#D7DCE7] text-base text-[#20232D]">
+                {mainFormula.components.map((component) => (
+                  <tr key={component.code}>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-sm bg-[#ECEEF1] px-1.5 text-sm text-[#555D6E]">{component.code}</span>
+                        <span>{component.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="inline-flex rounded-md bg-[#ECEEF1] px-3 py-1.5 text-sm font-medium">{component.weight}%</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="border-t border-[#C8D0DF] text-base">
+                <tr>
+                  <td className="px-5 py-5 font-medium">Total Bobot</td>
+                  <td className="px-5 py-5">
+                    <span className={isValid ? "inline-flex items-center gap-2 font-medium text-[#0756D9]" : "font-medium text-red-600"}>
+                      {totalWeight}%
+                      {isValid && <CheckCircle2 aria-label="Bobot valid" className="h-4 w-4 text-emerald-500" />}
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+        <aside className="rounded-lg border border-[#C8D0DF] bg-white p-6 shadow-[0_1px_3px_rgba(30,42,75,0.04)]" aria-labelledby="weight-distribution-title">
+          <h2 id="weight-distribution-title" className="text-lg font-medium text-[#20232D]">Distribusi Bobot</h2>
+          <div className="mt-5 flex flex-col items-center">
+            <div
+              role="img"
+              aria-label={`Distribusi bobot total ${totalWeight} persen`}
+              className="relative flex h-44 w-44 items-center justify-center rounded-full"
+              style={{ background: donutGradient }}
+            >
+              <div className="flex h-[116px] w-[116px] flex-col items-center justify-center rounded-full bg-white text-center">
+                <span className="text-3xl font-medium text-[#20232D]">{totalWeight}%</span>
+                <span className="mt-1 text-[10px] uppercase tracking-[0.12em] text-[#7A8293]">Total Bobot</span>
+              </div>
+            </div>
+            <p className={`mt-3 text-base font-medium uppercase ${isValid ? "text-[#343946]" : "text-red-600"}`}>{isValid ? "Valid" : "Tidak Valid"}</p>
+          </div>
+
+          <ul className="mt-5 space-y-4">
+            {CATEGORY_ORDER.map((category) => (
+              <li key={category} className="flex items-center gap-3 text-sm text-[#4D5362]">
+                <span aria-hidden="true" className="h-3 w-3 rounded-sm" style={{ backgroundColor: formulaCategoryColors[category] }} />
+                <span>{category}</span>
+                <strong className="ml-auto font-semibold text-[#20232D]">{categoryWeights[category] || 0}%</strong>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+    </main>
+  );
+}

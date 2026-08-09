@@ -2,12 +2,21 @@ import { LogOut, UserRound } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { teacherUser } from "../../data/teacherData";
-import { clearAuthSession } from "../../stores/authStore";
+import { clearAuthSession, getStoredUser } from "../../stores/authStore";
 import Button from "../ui/Button";
 import DropdownMenu from "../ui/DropdownMenu";
 import Modal from "../ui/Modal";
 
 export default function UserMenu() {
+  const currentUser = getStoredUser() || teacherUser;
+  const accountPath = currentUser.role === "student"
+    ? "/student/settings"
+    : currentUser.role === "superadmin"
+      ? "/superadmin/dashboard"
+      : currentUser.role === "admin"
+        ? "/admin/dashboard"
+        : "/teacher/account";
+  const secondaryIdentity = currentUser.email || `NIS: ${currentUser.nis}`;
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -34,11 +43,11 @@ export default function UserMenu() {
 
       <DropdownMenu open={open} onClose={closeMenu} labelledBy="user-menu-button">
         <div className="border-b border-[#ECEEF4] px-3 py-3">
-          <p className="font-semibold text-[#20232D]">{teacherUser.name}</p>
-          <p className="mt-0.5 truncate text-xs text-[#6A7080]">{teacherUser.email}</p>
+          <p className="font-semibold text-[#20232D]">{currentUser.name}</p>
+          <p className="mt-0.5 truncate text-xs text-[#6A7080]">{secondaryIdentity}</p>
         </div>
         <Link
-          to="/teacher/account"
+          to={accountPath}
           role="menuitem"
           onClick={closeMenu}
           className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-[#343946] hover:bg-slate-50"

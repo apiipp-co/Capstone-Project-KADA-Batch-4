@@ -8,7 +8,7 @@ export default function GradeTableHeader({ components, sortDirection, onSort }) 
         <th
           scope="col"
           aria-sort={sortDirection === "asc" ? "ascending" : "descending"}
-          className="sticky left-0 z-20 min-w-[220px] bg-white px-6 py-4 text-left sm:min-w-[320px]"
+          className="sticky left-0 z-20 min-w-[180px] bg-white px-4 py-4 text-left sm:min-w-[190px]"
         >
           <button
             type="button"
@@ -20,12 +20,12 @@ export default function GradeTableHeader({ components, sortDirection, onSort }) 
           </button>
         </th>
         {components.map((component) => (
-          <th key={component.id} scope="col" className="min-w-[78px] px-2 py-4 text-center">
+          <th key={component.id} scope="col" className="min-w-[56px] px-1 py-4 text-center">
             <span className="block text-sm font-semibold">{component.label}</span>
             <span className="mt-1 block text-xs font-normal text-[#7A8090]">{component.weight}%</span>
           </th>
         ))}
-        <th scope="col" className="min-w-[100px] border-l border-[#DDE2EC] bg-[#F3F3FF] px-3 py-4 text-center text-sm font-semibold">
+        <th scope="col" className="min-w-[80px] border-l border-[#DDE2EC] bg-[#F3F3FF] px-2 py-4 text-center text-sm font-semibold">
           Akhir
         </th>
       </tr>

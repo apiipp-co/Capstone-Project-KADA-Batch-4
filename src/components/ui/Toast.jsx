@@ -7,7 +7,7 @@ export default function Toast({ toast, onClose }) {
 
   return (
     <div
-      className={`fixed bottom-5 right-5 z-[80] flex max-w-[calc(100vw-2rem)] items-start gap-3 rounded-xl border bg-white px-4 py-3 text-sm shadow-soft ${
+      className={`fixed bottom-5 right-5 z-[100] flex max-w-[calc(100vw-2rem)] items-start gap-3 rounded-xl border bg-white px-4 py-3 text-sm shadow-soft ${
         isError ? "border-red-200 text-red-700" : "border-emerald-200 text-emerald-700"
       }`}
       role={isError ? "alert" : "status"}

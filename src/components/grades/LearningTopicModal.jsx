@@ -1,16 +1,14 @@
 import { Save } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { assessmentComponents } from "../../data/assessmentComponents";
 import Button from "../ui/Button";
 import Modal from "../ui/Modal";
-import UnsavedChangesModal from "./UnsavedChangesModal";
 
 export default function LearningTopicModal({ open, topics, onClose, onSave }) {
   const firstInputRef = useRef(null);
   const [draftTopics, setDraftTopics] = useState(topics);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
-  const [confirmClose, setConfirmClose] = useState(false);
   const [generalError, setGeneralError] = useState("");
 
   useEffect(() => {
@@ -18,18 +16,11 @@ export default function LearningTopicModal({ open, topics, onClose, onSave }) {
     setDraftTopics(topics);
     setErrors({});
     setGeneralError("");
-    setConfirmClose(false);
   }, [open, topics]);
-
-  const isDirty = useMemo(
-    () => JSON.stringify(draftTopics) !== JSON.stringify(topics),
-    [draftTopics, topics],
-  );
 
   const requestClose = () => {
     if (isSaving) return;
-    if (isDirty) setConfirmClose(true);
-    else onClose();
+    onClose();
   };
 
   const handleChange = (componentId, value) => {
@@ -40,19 +31,26 @@ export default function LearningTopicModal({ open, topics, onClose, onSave }) {
 
   const handleSave = async () => {
     const nextErrors = {};
+    const normalizedTopics = {};
     assessmentComponents.forEach((component) => {
-      if ((draftTopics[component.id] || "").length > 100) {
+      const topic = (draftTopics[component.id] || "").trim();
+      normalizedTopics[component.id] = topic;
+      if (!topic) {
+        nextErrors[component.id] = "Topik materi wajib diisi.";
+      } else if (topic.length > 100) {
         nextErrors[component.id] = "Topik materi maksimal 100 karakter.";
       }
     });
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors);
+      setGeneralError("Guru wajib menginput topik pembelajaran.");
+      requestAnimationFrame(() => firstInputRef.current?.focus());
       return;
     }
 
     setIsSaving(true);
     try {
-      await onSave(draftTopics);
+      await onSave(normalizedTopics);
       onClose();
     } catch {
       setGeneralError("Topik materi gagal disimpan. Silakan coba kembali.");
@@ -62,25 +60,24 @@ export default function LearningTopicModal({ open, topics, onClose, onSave }) {
   };
 
   return (
-    <>
       <Modal
         open={open}
         onClose={requestClose}
         title="Input Materi Pembelajaran"
-        panelClassName="max-h-[calc(100vh-2rem)] max-w-2xl overflow-y-auto"
+        panelClassName="max-h-[calc(100vh-2rem)] !max-w-[650px] overflow-y-auto rounded-[24px] [&_h2]:text-base"
         initialFocusRef={firstInputRef}
       >
         <div>
-          <div className="overflow-hidden rounded-lg border border-[#E4E8F1]">
-            <div className="grid grid-cols-[120px_1fr] bg-[#F3F3FF] px-4 py-3 text-xs font-semibold text-[#4B5060] sm:grid-cols-[190px_1fr]">
+          <div className="overflow-hidden">
+            <div className="grid grid-cols-[120px_1fr] bg-[#F3F3FF] px-4 py-2.5 text-xs font-semibold text-[#4B5060] sm:grid-cols-[190px_1fr]">
               <span>Komponen Nilai</span>
               <span>Topik Materi</span>
             </div>
             {assessmentComponents.map((component, index) => {
               const errorId = `topic-error-${component.id}`;
               return (
-                <div key={component.id} className="grid grid-cols-[120px_1fr] items-start gap-3 border-t border-[#E9ECF2] px-4 py-2 sm:grid-cols-[190px_1fr]">
-                  <label htmlFor={`topic-${component.id}`} className="pt-3 text-sm font-medium text-[#20232D]">
+                <div key={component.id} className="grid grid-cols-[120px_1fr] items-start gap-3 border-t border-[#E9ECF2] px-4 py-1.5 sm:grid-cols-[190px_1fr]">
+                  <label htmlFor={`topic-${component.id}`} className="pt-2.5 text-sm font-medium text-[#20232D]">
                     {component.label}
                   </label>
                   <div>
@@ -95,7 +92,7 @@ export default function LearningTopicModal({ open, topics, onClose, onSave }) {
                       aria-invalid={Boolean(errors[component.id])}
                       aria-describedby={errors[component.id] ? errorId : undefined}
                       placeholder={`Masukkan topik materi ${component.label}...`}
-                      className={`h-10 w-full rounded-lg border px-4 text-sm focus:outline-none focus:ring-2 disabled:bg-slate-50 ${
+                      className={`h-9 w-full rounded-lg border px-4 text-sm focus:outline-none focus:ring-2 disabled:bg-slate-50 ${
                         errors[component.id]
                           ? "border-red-500 focus:ring-red-100"
                           : "border-[#CDD4E2] focus:border-[#0756D9] focus:ring-blue-100"
@@ -107,27 +104,17 @@ export default function LearningTopicModal({ open, topics, onClose, onSave }) {
               );
             })}
           </div>
-          {generalError && <p role="alert" className="mt-3 text-sm text-red-600">{generalError}</p>}
-          <div className="-mx-6 -mb-6 mt-5 flex flex-col-reverse gap-3 border-t border-[#E4E8F1] px-6 py-5 sm:flex-row sm:justify-end">
-            <Button variant="secondary" onClick={requestClose} disabled={isSaving} className="h-11 border-[#0756D9] text-[#0756D9]">Batal</Button>
-            <Button onClick={handleSave} loading={isSaving} className="h-11 min-w-[180px]">
-              {!isSaving && <Save aria-hidden="true" className="h-4 w-4" />}
-              {isSaving ? "Menyimpan..." : "Simpan Materi"}
-            </Button>
+          <div className="-mx-6 -mb-6 mt-5 flex flex-col gap-3 border-t border-[#E4E8F1] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <p role="alert" className="min-h-5 text-xs font-medium text-red-600">{generalError}</p>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row">
+              <Button variant="secondary" onClick={requestClose} disabled={isSaving} className="h-11 border-[#0756D9] text-[#0756D9]">Batal</Button>
+              <Button onClick={handleSave} loading={isSaving} className="h-11 min-w-[180px]">
+                {!isSaving && <Save aria-hidden="true" className="h-4 w-4" />}
+                {isSaving ? "Menyimpan..." : "Simpan Materi"}
+              </Button>
+            </div>
           </div>
         </div>
       </Modal>
-
-      <UnsavedChangesModal
-        open={confirmClose}
-        onStay={() => setConfirmClose(false)}
-        onDiscard={() => {
-          setConfirmClose(false);
-          onClose();
-        }}
-        title="Tutup input materi?"
-        description="Perubahan topik materi yang belum disimpan akan hilang."
-      />
-    </>
   );
 }

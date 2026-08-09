@@ -2,9 +2,12 @@ import {
   defaultLearningTopics,
   GRADE_STATUSES,
   gradeStudents,
+  homeroomFinalGrades,
+  homeroomSubjects,
   initialGrades,
 } from "../data/gradeData";
 import { teacherUser } from "../data/teacherData";
+import { getStoredUser } from "../stores/authStore";
 import {
   getGradeDraft,
   getOfficialGradeRecord,
@@ -44,7 +47,13 @@ export async function getGradeSheet(filters) {
   const localDraft = getGradeDraft(filters);
   const visibleStudents = filters.classId === "CLS-002" ? gradeStudents.slice(0, 1) : gradeStudents;
   const visibleStudentIds = new Set(visibleStudents.map((student) => student.id));
-  const baseGrades = officialRecord?.grades || initialGrades;
+  const storedGrades = officialRecord?.grades || {};
+  const baseGrades = Object.fromEntries(
+    gradeStudents.map((student) => [
+      student.id,
+      { ...initialGrades[student.id], ...storedGrades[student.id] },
+    ]),
+  );
   const grades = Object.fromEntries(
     Object.entries(baseGrades).filter(([studentId]) => visibleStudentIds.has(studentId)),
   );
@@ -80,7 +89,7 @@ export async function saveGrades(payload) {
 export async function getLearningTopics(assignmentId) {
   await wait(250);
   const record = getTopicRecord(assignmentId);
-  return record?.topics || defaultLearningTopics;
+  return { ...defaultLearningTopics, ...record?.topics };
 }
 
 export async function saveLearningTopics(payload) {
@@ -90,4 +99,25 @@ export async function saveLearningTopics(payload) {
     throw new Error("UNAUTHORIZED_ASSIGNMENT");
   }
   return saveTopicRecord({ ...payload, savedAt: new Date().toISOString(), savedBy: teacherUser.id });
+}
+
+export async function getHomeroomSubjectGrades({ academicYear, semester, subjectId }) {
+  await wait(500);
+  const user = getStoredUser();
+  if (user?.role !== "teacher" || !user.isHomeroomTeacher || !user.homeroomClass?.id) {
+    throw new Error("UNAUTHORIZED_HOMEROOM_ACCESS");
+  }
+
+  const subject = homeroomSubjects.find((item) => item.id === subjectId);
+  if (!subject || academicYear !== "2026/2027" || normalizeSemester(semester) !== "GANJIL") {
+    throw new Error("INVALID_HOMEROOM_GRADE_FILTER");
+  }
+
+  return {
+    class: { ...user.homeroomClass },
+    subject,
+    students: user.homeroomClass.id === "CLS-001" ? gradeStudents : [],
+    grades: JSON.parse(JSON.stringify(initialGrades)),
+    finalGrades: { ...homeroomFinalGrades },
+  };
 }

@@ -2,7 +2,7 @@ import { CircleCheck, Cloud, PencilLine } from "lucide-react";
 
 export default function GradeSaveStatus({ isEditing, autosaveStatus }) {
   let Icon = PencilLine;
-  let text = "Simpan otomatis berhasil";
+  let text = "Simpan nilai berhasil";
   let style = "text-[#545968]";
 
   if (isEditing && autosaveStatus === "saving") {
@@ -19,7 +19,7 @@ export default function GradeSaveStatus({ isEditing, autosaveStatus }) {
 
   return (
     <p role="status" aria-live="polite" className={`inline-flex items-center gap-2 text-xs font-medium ${style}`}>
-      <Icon aria-hidden="true" className="h-4 w-4 text-[#0756D9]" /> {text}
+      {isEditing && <Icon aria-hidden="true" className="h-4 w-4 text-[#0756D9]" />} {text}
     </p>
   );
 }
