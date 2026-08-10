@@ -23,10 +23,15 @@ const AUTH_ERROR_MESSAGE =
   "Username/password salah.";
 
 const dashboardByRole = {
-  superadmin: "/superadmin/dashboard",
-  admin: "/admin/dashboard",
+  admin: "/superadmin/dashboard",
   teacher: "/teacher/dashboard",
   student: "/student/dashboard",
+};
+
+const routePrefixByRole = {
+  admin: "/superadmin/",
+  teacher: "/teacher/",
+  student: "/student/",
 };
 
 export default function LoginPage() {
@@ -58,7 +63,10 @@ export default function LoginPage() {
       setAuthSession(session.user, session.token);
       const fallback = dashboardByRole[session.user.role] || "/login";
       const requestedPath = location.state?.from;
-      navigate(requestedPath || fallback, { replace: true });
+      const safeRequestedPath = requestedPath?.startsWith(routePrefixByRole[session.user.role])
+        ? requestedPath
+        : null;
+      navigate(safeRequestedPath || fallback, { replace: true });
     } catch {
       setAuthError(AUTH_ERROR_MESSAGE);
       requestAnimationFrame(() => passwordRef.current?.focus());
@@ -73,7 +81,7 @@ export default function LoginPage() {
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-[18px]">
         <FormInput
           id="username"
-          label="Username"
+          label="NIP / NIS / Email Administrator"
           icon={IdCard}
           type="text"
           autoComplete="username"

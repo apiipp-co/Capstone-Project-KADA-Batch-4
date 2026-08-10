@@ -7,7 +7,9 @@ import {
   initialGrades,
 } from "../data/gradeData";
 import { teacherUser } from "../data/teacherData";
+import { appConfig } from "../config/env";
 import { getStoredUser } from "../stores/authStore";
+import { canViewClassSubjectGrades } from "../utils/teacherPermissions";
 import {
   getGradeDraft,
   getOfficialGradeRecord,
@@ -16,6 +18,7 @@ import {
   saveOfficialGradeRecord,
   saveTopicRecord,
 } from "../stores/gradeStore";
+import { api } from "./apiClient";
 
 const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 
@@ -41,6 +44,22 @@ function resolveAssignment(filters) {
 }
 
 export async function getGradeSheet(filters) {
+  if (!appConfig.useMockApi) {
+    const data = await api.get(`/teacher/classes/${filters.classId}/grades`);
+    const grades = data.grades || {};
+    (data.entries || []).forEach((entry) => {
+      grades[entry.studentId] ||= {};
+      grades[entry.studentId][entry.componentCode] = entry.score;
+    });
+    return {
+      assignment: data.assignment || { ...filters, assignmentId: data.assignmentId || filters.classId },
+      students: data.students || [],
+      grades,
+      localDraft: getGradeDraft(filters),
+      status: data.status || GRADE_STATUSES.DRAFT,
+      savedAt: data.savedAt || null,
+    };
+  }
   await wait(650);
   const assignment = resolveAssignment(filters);
   const officialRecord = getOfficialGradeRecord(filters);
@@ -75,6 +94,17 @@ export async function saveGradeDraft(payload) {
 }
 
 export async function saveGrades(payload) {
+  if (!appConfig.useMockApi) {
+    const entries = Object.entries(payload.grades).flatMap(([studentId, scores]) =>
+      Object.entries(scores).map(([componentCode, score]) => ({
+        studentId,
+        componentCode,
+        score: score === "" || score === undefined ? null : Number(score),
+      })),
+    );
+    const data = await api.put(`/teacher/classes/${payload.classId}/grades`, { entries });
+    return { success: true, savedAt: new Date().toISOString(), data: { ...data, grades: payload.grades, status: GRADE_STATUSES.DRAFT } };
+  }
   await wait(800);
   resolveAssignment(payload);
   const record = saveOfficialGradeRecord({
@@ -104,7 +134,7 @@ export async function saveLearningTopics(payload) {
 export async function getHomeroomSubjectGrades({ academicYear, semester, subjectId }) {
   await wait(500);
   const user = getStoredUser();
-  if (user?.role !== "teacher" || !user.isHomeroomTeacher || !user.homeroomClass?.id) {
+  if (!canViewClassSubjectGrades(user)) {
     throw new Error("UNAUTHORIZED_HOMEROOM_ACCESS");
   }
 

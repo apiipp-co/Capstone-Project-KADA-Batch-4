@@ -118,7 +118,7 @@ export async function generateStudentReport(payload, options = {}) {
   if (!student) throw new Error("STUDENT_NOT_FOUND");
   const scores = scoresFor(student.id, payload.filters);
   const problems = validateReportGeneration({ scores, assignment });
-  if (problems.length || TOTAL_ASSESSMENT_WEIGHT !== 100 || assessmentComponents.length !== 6) {
+  if (problems.length || TOTAL_ASSESSMENT_WEIGHT !== 100 || assessmentComponents.length !== 8) {
     throw new Error(problems[0] || "INVALID_REPORT_DATA");
   }
   const existing = getSubjectReport(student.id, assignment.assignmentId);
@@ -231,39 +231,6 @@ export async function finalizeSubjectReport(payload) {
     status: GRADE_STATUSES.FINALIZED_SUBJECT,
     finalizedAt: updated.finalizedAt,
     finalizedBy: teacherUser.id,
-  });
-  return updated;
-}
-
-export async function reopenSubjectReport(payload) {
-  if (String(payload.reason || "").trim().length < 10) throw new Error("REOPEN_REASON_TOO_SHORT");
-  await wait(750);
-  const report = getSubjectReport(payload.studentId, payload.assignmentId);
-  if (!report || report.status !== REPORT_STATUSES.FINALIZED_SUBJECT) throw new Error("REPORT_NOT_FINALIZED");
-  appendReportVersion(report, { action: "REOPEN", actorId: teacherUser.id, reason: payload.reason });
-  const updated = saveSubjectReport({
-    ...report,
-    status: REPORT_STATUSES.REOPENED,
-    reopenedAt: new Date().toISOString(),
-    reopenedBy: teacherUser.id,
-    reopenReason: String(payload.reason).trim(),
-    reportVersion: (report.reportVersion || 1) + 1,
-  });
-  const gradeFilters = {
-    classId: report.classId,
-    subjectId: report.subjectId,
-    academicYear: report.academicYear,
-    semester: report.semester,
-  };
-  const gradeRecord = getOfficialGradeRecord(gradeFilters);
-  saveOfficialGradeRecord({
-    ...gradeFilters,
-    ...(gradeRecord || {}),
-    grades: gradeRecord?.grades || initialGrades,
-    status: GRADE_STATUSES.REOPENED,
-    reopenedAt: updated.reopenedAt,
-    reopenedBy: teacherUser.id,
-    reopenReason: updated.reopenReason,
   });
   return updated;
 }

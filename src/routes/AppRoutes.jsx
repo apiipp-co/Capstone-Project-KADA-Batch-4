@@ -16,6 +16,7 @@ import TeacherReportsPage from "../pages/teacher/TeacherReportsPage";
 import TeacherStudentReportPage from "../pages/teacher/TeacherStudentReportPage";
 import TeacherSubjectGradesPage from "../pages/teacher/TeacherSubjectGradesPage";
 import StudentDashboardPage from "../pages/student/StudentDashboardPage";
+import StudentAttendancePage from "../pages/student/StudentAttendancePage";
 import StudentGradesPage from "../pages/student/StudentGradesPage";
 import StudentPlaceholderPage from "../pages/student/StudentPlaceholderPage";
 import StudentReportPage from "../pages/student/StudentReportPage";
@@ -48,7 +49,7 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route element={<RoleRoute allowedRoles={["superadmin"]} />}>
+        <Route element={<RoleRoute allowedRoles={["admin"]} />}>
           <Route element={<SuperAdminLayout />}>
             <Route path="/superadmin/dashboard" element={<SuperAdminDashboardPage />} />
             <Route path="/superadmin/accounts/teachers" element={<SuperAdminTeacherAccountsPage />} />
@@ -82,9 +83,7 @@ export default function AppRoutes() {
               ))}
           </Route>
         </Route>
-        <Route element={<RoleRoute allowedRoles={["admin"]} />}>
-          <Route path="/admin/dashboard" element={<DashboardPage adminMode />} />
-        </Route>
+        <Route path="/admin/dashboard" element={<Navigate to="/superadmin/dashboard" replace />} />
         <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/teacher/dashboard" element={<TeacherDashboardPage />} />
@@ -95,8 +94,10 @@ export default function AppRoutes() {
             </Route>
             <Route path="/teacher/reports" element={<TeacherReportsPage />} />
             <Route path="/teacher/reports/:studentId" element={<TeacherStudentReportPage />} />
-            <Route path="/teacher/homeroom/reports" element={<TeacherHomeroomReportsPage />} />
-            <Route path="/teacher/homeroom/reports/:studentId" element={<TeacherHomeroomReportsPage />} />
+            <Route element={<HomeroomRoute />}>
+              <Route path="/teacher/homeroom/reports" element={<TeacherHomeroomReportsPage />} />
+              <Route path="/teacher/homeroom/reports/:studentId" element={<TeacherHomeroomReportsPage />} />
+            </Route>
             <Route path="/teacher/account" element={<TeacherAccountPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
           </Route>
@@ -105,6 +106,7 @@ export default function AppRoutes() {
           <Route element={<DashboardLayout />}>
             <Route path="/student/dashboard" element={<StudentDashboardPage />} />
             <Route path="/student/grades" element={<StudentGradesPage />} />
+            <Route path="/student/attendance" element={<StudentAttendancePage />} />
             <Route path="/student/report" element={<StudentReportPage />} />
             <Route path="/student/settings" element={<StudentSettingsPage />} />
             <Route path="/student/ai-insight" element={<StudentPlaceholderPage page="ai" />} />

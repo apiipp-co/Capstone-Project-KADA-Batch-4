@@ -1,9 +1,13 @@
 import { historyByStudent, meetingHistory, students } from "../data/attendanceData";
 import { teacherUser } from "../data/teacherData";
 import { createAttendanceCsv, triggerCsvDownload } from "../utils/attendanceExport";
+import { appConfig } from "../config/env";
+import { api } from "./apiClient";
 
 const STORAGE_KEY = "edutrack_attendance_records";
 const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
+const apiToUiStatus = { Hadir: "PRESENT", Izin: "PERMITTED", Sakit: "SICK", Alpa: "ABSENT" };
+const uiToApiStatus = { PRESENT: "Hadir", PERMITTED: "Izin", SICK: "Sakit", ABSENT: "Alpa" };
 
 function readRecords() {
   try {
@@ -21,6 +25,26 @@ function assertAssignment({ classId, subjectId }) {
 }
 
 export async function getAttendance(filters) {
+  if (!appConfig.useMockApi) {
+    const [sessionsData, studentsData] = await Promise.all([
+      api.get(`/teacher/classes/${filters.classId}/attendance-sessions`),
+      api.get(`/teacher/classes/${filters.classId}/students`),
+    ]);
+    const sessions = sessionsData.items || sessionsData || [];
+    const classStudents = studentsData.items || studentsData.students || studentsData || [];
+    const selectedSession = sessions.find((session) => session.date === filters.date);
+    const detail = selectedSession ? await api.get(`/teacher/attendance-sessions/${selectedSession.id || selectedSession.sessionId}`) : null;
+    const records = detail?.students || detail?.records || [];
+    return {
+      meetingNumber: sessions.length + (selectedSession ? 0 : 1),
+      meetings: sessions.map((session, index) => ({ number: index + 1, date: session.date })),
+      students: classStudents.map((student) => {
+        const record = records.find((item) => (item.studentId || item.id) === student.id);
+        return { ...student, history: [], currentStatus: apiToUiStatus[record?.status] || "ABSENT" };
+      }),
+      savedRecord: selectedSession ? { ...selectedSession, sessionId: selectedSession.id || selectedSession.sessionId } : null,
+    };
+  }
   await wait(700);
   assertAssignment(filters);
   const savedRecord = readRecords().find(
@@ -38,13 +62,21 @@ export async function getAttendance(filters) {
       ...student,
       history: historyByStudent[student.id],
       currentStatus:
-        savedRecord?.records.find((record) => record.studentId === student.id)?.status || "NOT_RECORDED",
+        savedRecord?.records.find((record) => record.studentId === student.id)?.status || "ABSENT",
     })),
     savedRecord: savedRecord || null,
   };
 }
 
 export async function saveAttendance(payload) {
+  if (!appConfig.useMockApi) {
+    const session = await api.post(`/teacher/classes/${payload.classId}/attendance-sessions`, { date: payload.date });
+    const sessionId = session.sessionId || session.id;
+    await api.put(`/teacher/attendance-sessions/${sessionId}/records`, {
+      records: payload.records.map((record) => ({ studentId: record.studentId, status: uiToApiStatus[record.status] })),
+    });
+    return { ...payload, sessionId };
+  }
   await wait(800);
   assertAssignment(payload);
   const records = readRecords().filter(
@@ -62,6 +94,13 @@ export async function saveAttendance(payload) {
 }
 
 export async function updateAttendance(payload) {
+  if (!appConfig.useMockApi) {
+    if (!payload.sessionId) throw new Error("ATTENDANCE_SESSION_NOT_FOUND");
+    await api.put(`/teacher/attendance-sessions/${payload.sessionId}/records`, {
+      records: payload.records.map((record) => ({ studentId: record.studentId, status: uiToApiStatus[record.status] })),
+    });
+    return payload;
+  }
   await wait(800);
   assertAssignment(payload);
   const records = readRecords();

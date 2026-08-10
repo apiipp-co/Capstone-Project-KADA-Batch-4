@@ -1,5 +1,7 @@
 import { homeroomTeacherUser, teacherUser } from "../data/teacherData";
 import { secondaryStudentUser, studentUser } from "../data/studentData";
+import { appConfig } from "../config/env";
+import { api } from "./apiClient";
 
 const accounts = [
   {
@@ -10,9 +12,9 @@ const accounts = [
       id: "SUPERADMIN-001",
       name: "Budi Raharjo",
       email: "budi.raharjo@admin.edu",
-      role: "superadmin",
-      roleLabel: "Superadmin",
-      systemRoleLabel: "System Admin",
+      role: "admin",
+      roleLabel: "Administrator",
+      systemRoleLabel: "Administrator",
     },
   },
   {
@@ -45,6 +47,21 @@ const accounts = [
 const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 
 export async function login({ username, password }) {
+  if (!appConfig.useMockApi) {
+    const data = await api.post("/auth/login", { identifier: username.trim(), password }, { auth: false });
+    return {
+      token: data.token,
+      user: {
+        ...data.profile,
+        role: data.role,
+        isHomeroomTeacher: Boolean(data.profile?.isHomeroom),
+        homeroomClass: data.profile?.homeroomClassId
+          ? { id: data.profile.homeroomClassId, name: data.profile.homeroomClassName || "Kelas Wali" }
+          : null,
+      },
+    };
+  }
+
   await wait(850);
   const normalizedUsername = username.trim().toLowerCase();
   const account = accounts.find(
@@ -61,9 +78,4 @@ export async function login({ username, password }) {
     user: account.user,
     token: `demo-token-${account.user.id}`,
   };
-}
-
-export async function requestPasswordReset() {
-  await wait(750);
-  return { success: true };
 }

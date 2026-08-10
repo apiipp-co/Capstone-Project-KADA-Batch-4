@@ -11,10 +11,8 @@ export default function UserMenu() {
   const currentUser = getStoredUser() || teacherUser;
   const accountPath = currentUser.role === "student"
     ? "/student/settings"
-    : currentUser.role === "superadmin"
+    : currentUser.role === "admin"
       ? "/superadmin/dashboard"
-      : currentUser.role === "admin"
-        ? "/admin/dashboard"
         : "/teacher/account";
   const secondaryIdentity = currentUser.email || `NIS: ${currentUser.nis}`;
   const navigate = useNavigate();

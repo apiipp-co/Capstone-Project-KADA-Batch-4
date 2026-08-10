@@ -39,8 +39,8 @@ export default function SuperAdminTopbar({ onOpenMobile }) {
       </button>
       <div ref={menuRef} className="relative ml-auto flex items-center gap-3">
         <div className="hidden text-right sm:block">
-          <p className="text-xs font-semibold text-[#20232D]">Superadmin</p>
-          <p className="text-[10px] text-[#697184]">System Admin</p>
+          <p className="text-xs font-semibold text-[#20232D]">Administrator</p>
+          <p className="text-[10px] text-[#697184]">Admin Sekolah</p>
         </div>
         <button
           id="superadmin-profile-button"

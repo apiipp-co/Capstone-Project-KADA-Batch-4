@@ -32,7 +32,12 @@ export default function GradeTable({
     <section id="grade-table-section" className="mt-8 overflow-hidden rounded-2xl bg-white shadow-soft">
       <div className="max-w-full overflow-x-auto">
         <table className="w-full min-w-[720px] border-collapse">
-          <GradeTableHeader components={components} sortDirection={sortDirection} onSort={onSort} />
+          <GradeTableHeader
+            components={components}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            sortable={!readOnly}
+          />
           <tbody>
             {students.map((student) => (
               <tr key={student.id} className="group border-t border-[#E9ECF2] hover:bg-[#FBFCFE]">

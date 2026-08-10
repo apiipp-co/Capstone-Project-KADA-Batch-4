@@ -5,6 +5,7 @@ import Button from "../../ui/Button";
 import Toast from "../../ui/Toast";
 import BulkAccountUploadPage from "./BulkAccountUploadPage";
 import GeneratedAccountTable from "./GeneratedAccountTable";
+import { appConfig } from "../../../config/env";
 
 const GENERATION_STATES = {
   SUMMARY: "summary",
@@ -45,7 +46,7 @@ export default function BulkAccountGenerationPage({ accountType }) {
 
   const handleUploadSuccess = (fileMetadata) => {
     setUploadedFile(fileMetadata);
-    setGenerationStatus(GENERATION_STATES.SUMMARY);
+    setGenerationStatus(fileMetadata.result?.mock ? GENERATION_STATES.SUMMARY : GENERATION_STATES.GENERATED);
   };
 
   const generateAccounts = async () => {
@@ -80,20 +81,20 @@ export default function BulkAccountGenerationPage({ accountType }) {
               </div>
             </div>
 
-            <Button onClick={generateAccounts} disabled={generating} className="mt-5 h-11 w-full">
+            {appConfig.useMockApi ? <Button onClick={generateAccounts} disabled={generating} className="mt-5 h-11 w-full">
               {generating ? (
                 <><LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" /> Memproses Akun...</>
               ) : (
                 <><Sparkles aria-hidden="true" className="h-4 w-4" /> Buat Akun Otomatis Dengan AI</>
               )}
-            </Button>
+            </Button> : <div className="mt-5 rounded-lg bg-emerald-50 p-4 text-sm text-emerald-700"><strong>{uploadedFile.result?.createdCount ?? 0} akun berhasil dibuat.</strong>{uploadedFile.result?.failedRows?.length > 0 && <p className="mt-1">{uploadedFile.result.failedRows.length} baris gagal dan perlu diperiksa kembali.</p>}</div>}
 
             {generationStatus === GENERATION_STATES.ERROR && (
               <p role="alert" className="mt-3 text-xs text-red-600">Pratinjau akun gagal diproses. Silakan coba kembali.</p>
             )}
           </section>
 
-          {generated && (
+          {generated && appConfig.useMockApi && (
             <GeneratedAccountTable
               entityType={accountType}
               rows={config.rows}

@@ -4,8 +4,7 @@ import Button from "../components/ui/Button";
 import { clearAuthSession, getStoredUser } from "../stores/authStore";
 
 const dashboardByRole = {
-  superadmin: "/superadmin/dashboard",
-  admin: "/admin/dashboard",
+  admin: "/superadmin/dashboard",
   teacher: "/teacher/dashboard",
   student: "/student/dashboard",
 };

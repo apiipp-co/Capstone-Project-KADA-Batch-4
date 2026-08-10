@@ -1,5 +1,5 @@
 export const SUPPORTED_IMPORT_EXTENSIONS = [".xlsx", ".csv"];
-export const MAX_IMPORT_FILE_SIZE = 10 * 1024 * 1024;
+export const MAX_IMPORT_FILE_SIZE = 5 * 1024 * 1024;
 
 function getFileExtension(fileName) {
   const dotIndex = fileName.lastIndexOf(".");
@@ -13,13 +13,14 @@ export function formatImportFileSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function validateImportFile(file) {
+export function validateImportFile(file, options = {}) {
   if (!file) return "";
-  if (file.size > MAX_IMPORT_FILE_SIZE) return "Ukuran file maksimal 10MB.";
+  if (file.size > MAX_IMPORT_FILE_SIZE) return "Ukuran file maksimal 5MB.";
 
-  const extensionAllowed = SUPPORTED_IMPORT_EXTENSIONS.includes(getFileExtension(file.name));
+  const extensions = options.extensions || SUPPORTED_IMPORT_EXTENSIONS;
+  const extensionAllowed = extensions.includes(getFileExtension(file.name));
   if (!extensionAllowed) {
-    return "Format file tidak didukung. Gunakan .xlsx atau .csv.";
+    return `Format file tidak didukung. Gunakan ${extensions.join(" atau ")}.`;
   }
   return "";
 }

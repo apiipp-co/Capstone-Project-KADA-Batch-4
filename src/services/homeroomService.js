@@ -1,0 +1,53 @@
+import { appConfig } from "../config/env";
+import { api } from "./apiClient";
+
+const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
+const MOCK_STATUS_KEY = "edutrack_mock_homeroom_report_status";
+
+const mockSubjects = [
+  { id: "SUB-001", name: "Matematika Wajib", teacherName: "Budi Raharjo", complete: true },
+  { id: "SUB-002", name: "Ilmu Pengetahuan Alam", teacherName: "Siti Rahmawati", complete: true },
+  { id: "SUB-003", name: "Bahasa Indonesia", teacherName: "Dewi Lestari", complete: true },
+];
+
+function readMockStatus() {
+  return localStorage.getItem(MOCK_STATUS_KEY) || "Draft";
+}
+
+export async function getHomeroomWorkspace(classId) {
+  if (!appConfig.useMockApi) {
+    const [overview, completeness] = await Promise.all([
+      api.get(`/homeroom/classes/${classId}/overview`),
+      api.get(`/homeroom/classes/${classId}/completeness`),
+    ]);
+    return { overview, completeness, status: overview?.reportStatus || completeness?.reportStatus || "Draft" };
+  }
+  await wait(450);
+  return {
+    status: readMockStatus(),
+    overview: { classId, studentCount: 32, average: 84.6, attendancePercentage: 91 },
+    completeness: { subjects: mockSubjects, complete: mockSubjects.every((subject) => subject.complete) },
+  };
+}
+
+export async function finalizeHomeroomReports(classId) {
+  if (!appConfig.useMockApi) return api.post(`/homeroom/classes/${classId}/finalize`);
+  await wait(700);
+  localStorage.setItem(MOCK_STATUS_KEY, "Finalized");
+  return { finalizedCount: 32 };
+}
+
+export async function distributeHomeroomReports(classId) {
+  if (!appConfig.useMockApi) return api.post(`/homeroom/classes/${classId}/distribute`);
+  await wait(700);
+  if (readMockStatus() !== "Finalized") throw new Error("REPORT_NOT_FINALIZED");
+  localStorage.setItem(MOCK_STATUS_KEY, "Distributed");
+  return { distributedCount: 32 };
+}
+
+export async function saveHomeroomReportNote(studentId, note) {
+  if (!appConfig.useMockApi) return api.patch(`/homeroom/report-cards/${studentId}/note`, { note });
+  await wait(300);
+  return { studentId, note };
+}
+

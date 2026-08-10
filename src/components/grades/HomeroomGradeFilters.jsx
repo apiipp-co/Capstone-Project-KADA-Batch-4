@@ -19,9 +19,9 @@ export default function HomeroomGradeFilters({ filters, onChange, onShow, loadin
   return (
     <section
       aria-label="Filter nilai mata pelajaran"
-      className="mt-8 rounded-[14px] border border-[#E4E8F1] bg-white p-4 shadow-[0_2px_5px_rgba(30,42,75,0.04)]"
+      className="mt-8 max-w-[680px] rounded-[14px] border border-[#E4E8F1] bg-white p-4 shadow-[0_2px_5px_rgba(30,42,75,0.04)]"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(180px,0.9fr)_minmax(200px,1fr)_minmax(220px,1.35fr)_auto] xl:items-end [&_select]:text-xs">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(120px,0.85fr)_minmax(140px,1fr)_minmax(170px,1.25fr)_auto] xl:items-end [&_select]:text-xs">
         <FilterField label="Tahun Ajaran">
           <Select label="Tahun Ajaran" value={filters.academicYear} onChange={changeFilter("academicYear")} disabled={loading}>
             <option value="2026/2027">2026/2027</option>

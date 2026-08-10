@@ -2,8 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { getStoredUser } from "../stores/authStore";
 
 const dashboardByRole = {
-  superadmin: "/superadmin/dashboard",
-  admin: "/admin/dashboard",
+  admin: "/superadmin/dashboard",
   teacher: "/teacher/dashboard",
   student: "/student/dashboard",
 };

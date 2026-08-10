@@ -1,10 +1,9 @@
-import { FileDown, LockOpen, RefreshCw, Sparkles } from "lucide-react";
+import { RefreshCw, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useBlocker, useParams, useSearchParams } from "react-router-dom";
 import AttendanceSummaryCard from "../../components/reports/AttendanceSummaryCard";
 import FinalizeConfirmationModal from "../../components/reports/FinalizeConfirmationModal";
 import FinalizeReportButton from "../../components/reports/FinalizeReportButton";
-import ReopenReportModal from "../../components/reports/ReopenReportModal";
 import ReportDownloadButton from "../../components/reports/ReportDownloadButton";
 import ReportFinalizedBanner from "../../components/reports/ReportFinalizedBanner";
 import ReportIncompleteAlert from "../../components/reports/ReportIncompleteAlert";
@@ -23,7 +22,6 @@ import {
   downloadSubjectReport,
   finalizeSubjectReport,
   getStudentReport,
-  reopenSubjectReport,
   saveReportNote,
 } from "../../services/reportService";
 import { validateSubjectFinalization } from "../../utils/reportValidation";
@@ -47,8 +45,6 @@ export default function TeacherStudentReportPage() {
   const [savingNote, setSavingNote] = useState(false);
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
-  const [reopenOpen, setReopenOpen] = useState(false);
-  const [reopening, setReopening] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [unsavedOpen, setUnsavedOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -162,20 +158,6 @@ export default function TeacherStudentReportPage() {
     }
   };
 
-  const confirmReopen = async (reason) => {
-    setReopening(true);
-    try {
-      const updated = await reopenSubjectReport({ studentId, assignmentId, reason });
-      setData((current) => ({ ...current, report: updated }));
-      setReopenOpen(false);
-      setToast({ type: "success", message: "Rapor mapel berhasil dibuka kembali untuk koreksi." });
-    } catch {
-      setToast({ type: "error", message: "Rapor gagal dibuka kembali." });
-    } finally {
-      setReopening(false);
-    }
-  };
-
   const download = async () => {
     setDownloading(true);
     try {
@@ -199,7 +181,7 @@ export default function TeacherStudentReportPage() {
   if (pageState === "error") return <div className="px-4 py-12"><section role="alert" className="mx-auto max-w-md rounded-2xl bg-white p-8 text-center shadow-soft"><h1 className="text-xl font-bold">Rapor tidak dapat dimuat</h1><p className="mt-2 text-sm text-[#64748B]">Rapor belum dibuat atau Anda tidak memiliki akses.</p><Button onClick={load} className="mt-6"><RefreshCw aria-hidden="true" className="h-4 w-4" /> Coba Lagi</Button></section></div>;
 
   const headerActions = finalized ? (
-    <><Button variant="secondary" onClick={() => setReopenOpen(true)} className="h-10"><LockOpen aria-hidden="true" className="h-4 w-4" /> Ajukan Buka Kembali</Button><ReportDownloadButton finalized onClick={download} loading={downloading} /></>
+    <ReportDownloadButton finalized onClick={download} loading={downloading} />
   ) : (
     <><FinalizeReportButton onClick={requestFinalize} disabled={finalizationProblems.length > 0 && !noteDirty} reason={finalizationProblems[0]} loading={finalizing} /><ReportDownloadButton finalized={false} onClick={download} loading={downloading} /></>
   );
@@ -207,17 +189,15 @@ export default function TeacherStudentReportPage() {
   return (
     <div className="px-4 py-8 sm:px-7 lg:px-10"><div className="mx-auto max-w-[1120px]">
       <StudentReportHeader student={data.student} assignment={data.assignment} status={report.status} actions={headerActions} />
-      <div className="mt-7 space-y-4">{finalized && <ReportFinalizedBanner metadata={finalizedMetadata(report)} />}{!finalized && <ReportIncompleteAlert problems={finalizationProblems} />}</div>
+      <div className="mt-7 space-y-4">{finalized && <><ReportFinalizedBanner metadata={finalizedMetadata(report)} /><section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-800">Perubahan setelah finalisasi harus diajukan melalui Administrator sekolah.</section></>}{!finalized && <ReportIncompleteAlert problems={finalizationProblems} />}</div>
       <section className="mt-7 grid gap-4 lg:grid-cols-[0.72fr_0.72fr_1.35fr]"><ReportSummaryCard value={report.finalGrade} /><AttendanceSummaryCard percentage={report.attendancePercentage} attendance={report.attendance} /><SubjectScoreSummary assignment={data.assignment} report={report} reportViewMode="subject" /></section>
       <div className="mt-5">{finalized ? <ReportNoteReadOnly note={report.note} metadata={finalizedMetadata(report)} /> : <ReportNoteEditor value={note} onChange={changeNote} onSave={() => saveNote()} onCancel={cancelNoteChanges} onAiDraft={makeAiDraft} saving={savingNote} dirty={noteDirty} aiDraft={aiDraft} />}</div>
       {!finalized && <section className="mt-5 rounded-xl border border-violet-100 bg-violet-50 p-4 text-xs leading-5 text-violet-700"><Sparkles aria-hidden="true" className="mr-2 inline h-4 w-4" />Draf AI hanya menyusun kalimat dari nilai, KKM, topik, dan presensi. Guru tetap wajib meninjau serta menyimpan catatan secara manual.</section>}
     </div>
 
       <FinalizeConfirmationModal open={finalizeOpen} studentName={data.student.name} ready={!finalizationProblems.length && !noteDirty} loading={finalizing} onClose={() => setFinalizeOpen(false)} onConfirm={confirmFinalize} />
-      <ReopenReportModal open={reopenOpen} loading={reopening} onClose={() => setReopenOpen(false)} onConfirm={confirmReopen} />
       <ReportNoteUnsavedModal open={unsavedOpen} saving={savingNote} onClose={() => { setUnsavedOpen(false); setPendingAction(null); blocker.reset?.(); }} onDiscard={discardChanges} onSave={() => saveNote(pendingAction)} />
       <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }
-

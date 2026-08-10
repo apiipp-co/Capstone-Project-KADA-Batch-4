@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp } from "lucide-react";
 
-export default function GradeTableHeader({ components, sortDirection, onSort }) {
+export default function GradeTableHeader({ components, sortDirection, onSort, sortable = true }) {
   const SortIcon = sortDirection === "asc" ? ArrowDown : ArrowUp;
   return (
     <thead className="bg-white text-[#4B5060]">
@@ -10,14 +10,18 @@ export default function GradeTableHeader({ components, sortDirection, onSort }) 
           aria-sort={sortDirection === "asc" ? "ascending" : "descending"}
           className="sticky left-0 z-20 min-w-[180px] bg-white px-4 py-4 text-left sm:min-w-[190px]"
         >
-          <button
-            type="button"
-            onClick={onSort}
-            className="inline-flex items-center gap-2 rounded text-sm font-semibold hover:text-[#0756D9]"
-            aria-label={`Urutkan nama siswa ${sortDirection === "asc" ? "Z ke A" : "A ke Z"}`}
-          >
-            Nama Siswa <SortIcon aria-hidden="true" className="h-4 w-4" />
-          </button>
+          {sortable ? (
+            <button
+              type="button"
+              onClick={onSort}
+              className="inline-flex items-center gap-2 rounded text-sm font-semibold hover:text-[#0756D9]"
+              aria-label={`Urutkan nama siswa ${sortDirection === "asc" ? "Z ke A" : "A ke Z"}`}
+            >
+              Nama Siswa <SortIcon aria-hidden="true" className="h-4 w-4" />
+            </button>
+          ) : (
+            <span className="text-sm font-semibold">Nama Siswa</span>
+          )}
         </th>
         {components.map((component) => (
           <th key={component.id} scope="col" className="min-w-[56px] px-1 py-4 text-center">

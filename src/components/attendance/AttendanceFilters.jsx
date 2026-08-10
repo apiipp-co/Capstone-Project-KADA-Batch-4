@@ -3,11 +3,11 @@ import { teacherUser } from "../../data/teacherData";
 import DatePicker from "../ui/DatePicker";
 import Select from "../ui/Select";
 
-export default function AttendanceFilters({ filters, onChange, onSearch, onDownload, loaded, loading }) {
-  const selectedAssignment = teacherUser.assignedClasses.find((item) => item.id === filters.classId);
+export default function AttendanceFilters({ filters, onChange, onSearch, onDownload, loaded, loading, assignments = teacherUser.assignedClasses }) {
+  const selectedAssignment = assignments.find((item) => item.id === filters.classId) || assignments[0];
 
   const changeClass = (event) => {
-    const assignment = teacherUser.assignedClasses.find((item) => item.id === event.target.value);
+    const assignment = assignments.find((item) => item.id === event.target.value);
     onChange({ ...filters, classId: assignment.id, subjectId: assignment.subjectId });
   };
 
@@ -15,7 +15,7 @@ export default function AttendanceFilters({ filters, onChange, onSearch, onDownl
     <section className="border-b border-[#E5E8F0] bg-white px-4 py-4 sm:px-6">
       <div className="ml-auto grid max-w-[860px] grid-cols-1 gap-3 sm:grid-cols-2 xl:flex xl:items-center xl:justify-end">
         <Select label="Kelas" value={filters.classId} onChange={changeClass} disabled={loading} className="xl:w-[160px] xl:shrink-0">
-          {teacherUser.assignedClasses.map((item) => (
+          {assignments.map((item) => (
             <option key={item.id} value={item.id}>{item.name}</option>
           ))}
         </Select>

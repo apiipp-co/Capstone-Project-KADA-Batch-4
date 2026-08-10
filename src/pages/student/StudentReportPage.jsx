@@ -5,7 +5,7 @@ import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
 import Spinner from "../../components/ui/Spinner";
 import Toast from "../../components/ui/Toast";
-import { getStudentReport } from "../../services/studentService";
+import { downloadStudentReport, getStudentReport } from "../../services/studentService";
 import { getStoredUser } from "../../stores/authStore";
 
 const defaultPeriod = { academicYear: "2026/2027", semester: "Semester Ganjil" };
@@ -17,6 +17,7 @@ export default function StudentReportPage() {
   const [report, setReport] = useState(null);
   const [status, setStatus] = useState("loading");
   const [toast, setToast] = useState(null);
+  const [downloading, setDownloading] = useState(false);
 
   const loadReport = async () => {
     setStatus("loading");
@@ -36,6 +37,18 @@ export default function StudentReportPage() {
 
   const isDistributed = report?.status === "Distributed";
 
+  const downloadReport = async () => {
+    setDownloading(true);
+    try {
+      await downloadStudentReport();
+      setToast({ type: "success", message: "Rapor PDF berhasil diunduh." });
+    } catch {
+      setToast({ type: "error", message: "Rapor belum dapat diunduh." });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="px-4 py-8 sm:px-7 lg:px-10">
       <div className="mx-auto max-w-[1100px]">
@@ -46,10 +59,12 @@ export default function StudentReportPage() {
           </div>
           {isDistributed && (
             <Button
-              onClick={() => setToast({ type: "success", message: "Download PDF akan dihubungkan ke layanan rapor sekolah." })}
+              onClick={downloadReport}
+              loading={downloading}
+              disabled={downloading}
               className="h-11 self-start px-5"
             >
-              <Download aria-hidden="true" className="h-4 w-4" /> Download Rapor PDF
+              <Download aria-hidden="true" className="h-4 w-4" /> {downloading ? "Menyiapkan PDF..." : "Download Rapor PDF"}
             </Button>
           )}
         </header>

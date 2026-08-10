@@ -16,6 +16,7 @@ import {
   updateAttendance,
 } from "../../services/attendanceService";
 import { toIsoDate } from "../../utils/dateFormatter";
+import { getTeacherClasses } from "../../services/teacherService";
 
 const initialAssignment = teacherUser.assignedClasses[0];
 
@@ -25,6 +26,7 @@ export default function TeacherAttendancePage() {
     subjectId: initialAssignment.subjectId,
     date: toIsoDate(),
   });
+  const [assignments, setAssignments] = useState(teacherUser.assignedClasses);
   const [data, setData] = useState(null);
   const [statuses, setStatuses] = useState({});
   const [originalStatuses, setOriginalStatuses] = useState({});
@@ -48,9 +50,18 @@ export default function TeacherAttendancePage() {
   }, [toast]);
 
   const selectedAssignment = useMemo(
-    () => teacherUser.assignedClasses.find((item) => item.id === filters.classId),
-    [filters.classId],
+    () => assignments.find((item) => item.id === filters.classId) || assignments[0],
+    [assignments, filters.classId],
   );
+
+  useEffect(() => {
+    getTeacherClasses().then((items) => {
+      if (!items.length) return;
+      setAssignments(items);
+      const first = items[0];
+      setFilters((current) => ({ ...current, classId: first.id, subjectId: first.subjectId }));
+    }).catch(() => {});
+  }, []);
 
   const changeFilters = (nextFilters) => {
     setFilters(nextFilters);
@@ -111,6 +122,7 @@ export default function TeacherAttendancePage() {
       date: filters.date,
       savedAt: now,
       savedBy: teacherUser.id,
+      sessionId: data.savedRecord?.sessionId || null,
       records: data.students.map((student) => ({ studentId: student.id, status: statuses[student.id] })),
     };
 
@@ -186,6 +198,7 @@ export default function TeacherAttendancePage() {
         onDownload={handleDownload}
         loaded={loaded}
         loading={loading || saving}
+        assignments={assignments}
       />
 
       <div className="px-4 py-8 sm:px-6 lg:px-7">

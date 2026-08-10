@@ -39,10 +39,36 @@ export const studentDashboardDataByStudentId = {
 };
 
 export const mockAiInsight = {
-  subject: "Fisika",
-  message: "Nilai Fisikamu perlu sedikit dorongan.",
-  recommendation:
-    'AI menyarankan untuk meninjau kembali video "Hukum Newton" dan mengerjakan latihan soal "Gaya dan Gerak" agar pemahamanmu lebih mantap.',
+  generatedAt: "2026-08-09T09:00:00.000Z",
+  dataPeriod: "Semester Ganjil 2026/2027",
+  isPartialData: true,
+  recommendationParagraph:
+    "Capaianmu sudah baik. Prioritaskan penguatan Fisika dan konsistensi kehadiran agar hasil semester semakin stabil.",
+  bullets: [
+    "Nilai Fisika masih perlu ditingkatkan pada topik Hukum Newton.",
+    "Kehadiran saat pembahasan Gaya dan Gerak lebih rendah dibanding materi lain.",
+  ],
+  actionOptions: [
+    "Ulangi latihan Hukum Newton selama 20 menit.",
+    "Tanyakan tugas yang belum dipahami kepada Guru Mapel.",
+  ],
+};
+
+export const studentAttendanceDataByStudentId = {
+  [studentUser.id]: {
+    overallPercentage: 85,
+    subjects: [
+      { id: "SUB-001", name: "Matematika Wajib", present: 18, permitted: 1, sick: 0, absent: 1, total: 20, percentage: 90 },
+      { id: "SUB-002", name: "Ilmu Pengetahuan Alam", present: 16, permitted: 1, sick: 1, absent: 2, total: 20, percentage: 80 },
+      { id: "SUB-003", name: "Bahasa Indonesia", present: 17, permitted: 1, sick: 1, absent: 1, total: 20, percentage: 85 },
+    ],
+  },
+  [secondaryStudentUser.id]: {
+    overallPercentage: 90,
+    subjects: [
+      { id: "SUB-001", name: "Matematika Wajib", present: 18, permitted: 1, sick: 1, absent: 0, total: 20, percentage: 90 },
+    ],
+  },
 };
 
 const gradeComponents = {

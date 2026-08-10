@@ -11,6 +11,7 @@ export default function ImportFileDropzone({
   disabled = false,
   variant = "account",
   inputLabel = "Pilih file import",
+  accept = SUPPORTED_IMPORT_EXTENSIONS,
 }) {
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -34,7 +35,7 @@ export default function ImportFileDropzone({
         ref={fileInputRef}
         type="file"
         aria-label={inputLabel}
-        accept={SUPPORTED_IMPORT_EXTENSIONS.join(",")}
+        accept={accept.join(",")}
         onChange={(event) => {
           onFileSelect(event.target.files?.[0]);
           event.target.value = "";

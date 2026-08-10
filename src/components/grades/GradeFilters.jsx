@@ -11,12 +11,12 @@ function FilterField({ label, children }) {
   );
 }
 
-export default function GradeFilters({ filters, onChange, onShow, loading }) {
-  const selectedAssignment = teacherUser.assignedClasses.find((item) => item.id === filters.classId);
+export default function GradeFilters({ filters, onChange, onShow, loading, assignments = teacherUser.assignedClasses }) {
+  const selectedAssignment = assignments.find((item) => item.id === filters.classId) || assignments[0];
   const keepAssignedOption = () => {};
 
   const changeClass = (event) => {
-    const assignment = teacherUser.assignedClasses.find((item) => item.id === event.target.value);
+    const assignment = assignments.find((item) => item.id === event.target.value);
     onChange({
       classId: assignment.id,
       subjectId: assignment.subjectId,
@@ -51,7 +51,7 @@ export default function GradeFilters({ filters, onChange, onShow, loading }) {
             disabled={loading}
             className="[&_select]:border-blue-200 [&_select]:bg-blue-50 [&_select]:font-semibold [&_select]:text-[#0756D9]"
           >
-            {teacherUser.assignedClasses.map((item) => (
+            {assignments.map((item) => (
               <option key={item.id} value={item.id}>{item.name}</option>
             ))}
           </Select>

@@ -1,5 +1,6 @@
 const USER_KEY = "edutrack_user";
-const TOKEN_KEY = "edutrack_demo_token";
+const TOKEN_KEY = "edutrack_auth_token";
+const LEGACY_TOKEN_KEY = "edutrack_demo_token";
 
 export function getStoredUser() {
   try {
@@ -12,13 +13,19 @@ export function getStoredUser() {
 export function setAuthSession(user, token) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   localStorage.setItem(TOKEN_KEY, token);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
 export function clearAuthSession() {
   localStorage.removeItem(USER_KEY);
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
+}
+
+export function getAuthToken() {
+  return localStorage.getItem(TOKEN_KEY) || localStorage.getItem(LEGACY_TOKEN_KEY);
 }
 
 export function hasAuthSession() {
-  return Boolean(getStoredUser() && localStorage.getItem(TOKEN_KEY));
+  return Boolean(getStoredUser() && getAuthToken());
 }

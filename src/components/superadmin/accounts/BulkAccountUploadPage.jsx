@@ -5,6 +5,7 @@ import Button from "../../ui/Button";
 import Modal from "../../ui/Modal";
 import Toast from "../../ui/Toast";
 import { formatImportFileSize, validateImportFile } from "../../../utils/importFile";
+import { downloadAccountTemplate, importAccounts } from "../../../services/adminService";
 
 const UPLOAD_STATES = {
   IDLE: "idle",
@@ -43,7 +44,7 @@ export default function BulkAccountUploadPage({ accountType, onUploadSuccess, ch
   if (!config) throw new Error(`Unsupported account import type: ${accountType}`);
 
   const selectValidFile = (file) => {
-    const validationError = validateImportFile(file);
+    const validationError = validateImportFile(file, { extensions: [".csv"] });
     setUploadError(validationError);
     if (!file || validationError) {
       setSelectedFile(null);
@@ -72,19 +73,28 @@ export default function BulkAccountUploadPage({ accountType, onUploadSuccess, ch
   const processFile = async () => {
     if (!selectedFile || uploadStatus === UPLOAD_STATES.UPLOADING) return;
     setUploadStatus(UPLOAD_STATES.UPLOADING);
-    // TODO: replace with accountImportService.upload({ type: accountType, file: selectedFile }).
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    const fileMetadata = { name: selectedFile.name, size: selectedFile.size, type: selectedFile.type };
-    setUploadedFile(fileMetadata);
-    setUploadStatus(UPLOAD_STATES.SUCCESS);
-    setIsUploadModalOpen(false);
-    setSelectedFile(null);
-    onUploadSuccess?.(fileMetadata);
-    setToast({ type: "success", message: config.successMessage });
+    try {
+      const result = await importAccounts(accountType, selectedFile);
+      const fileMetadata = { name: selectedFile.name, size: selectedFile.size, type: selectedFile.type, result };
+      setUploadedFile(fileMetadata);
+      setUploadStatus(UPLOAD_STATES.SUCCESS);
+      setIsUploadModalOpen(false);
+      setSelectedFile(null);
+      onUploadSuccess?.(fileMetadata);
+      setToast({ type: "success", message: result.mock ? config.successMessage : `${result.createdCount ?? 0} akun berhasil dibuat.` });
+    } catch (error) {
+      setUploadStatus(UPLOAD_STATES.ERROR);
+      setUploadError(error.message || "File gagal diproses.");
+    }
   };
 
-  const downloadTemplate = () => {
-    setToast({ type: "success", message: `Template Excel ${config.subject} belum tersedia pada mode frontend.` });
+  const downloadTemplate = async () => {
+    try {
+      const downloaded = await downloadAccountTemplate(accountType);
+      setToast({ type: downloaded ? "success" : "error", message: downloaded ? "Template CSV berhasil diunduh." : "Template hanya tersedia ketika backend aktif." });
+    } catch (error) {
+      setToast({ type: "error", message: error.message || "Template gagal diunduh." });
+    }
   };
 
   return (
@@ -108,8 +118,8 @@ export default function BulkAccountUploadPage({ accountType, onUploadSuccess, ch
                 </>
               ) : (
                 <>
-                  <h2 className="text-sm font-medium text-[#20232D]">Klik untuk unggah data {config.subject} <span className="text-xs font-normal text-[#555D6E]">(.xlsx atau .csv)</span></h2>
-                  <p className="mt-1 text-xs text-[#555D6E]">Maksimal ukuran file 10MB</p>
+                  <h2 className="text-sm font-medium text-[#20232D]">Klik untuk unggah data {config.subject} <span className="text-xs font-normal text-[#555D6E]">(.csv)</span></h2>
+                  <p className="mt-1 text-xs text-[#555D6E]">Maksimal ukuran file 5MB</p>
                 </>
               )}
             </div>
@@ -140,10 +150,10 @@ export default function BulkAccountUploadPage({ accountType, onUploadSuccess, ch
       >
         <div className="border-t border-[#D7DCE7] pt-5">
           <p className="text-sm leading-5 text-[#555D6E]">
-            Silakan unggah file data {config.subject} dalam format Excel<br className="hidden sm:block" /> (.xlsx atau .csv)
+            Silakan unggah file data {config.subject} dalam format CSV (.csv)
           </p>
           <button type="button" onClick={downloadTemplate} className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-[#0756D9] hover:underline">
-            <Download aria-hidden="true" className="h-4 w-4" /> Unduh Template Excel
+            <Download aria-hidden="true" className="h-4 w-4" /> Unduh Template CSV
           </button>
 
           <ImportFileDropzone
@@ -152,6 +162,7 @@ export default function BulkAccountUploadPage({ accountType, onUploadSuccess, ch
             onFileSelect={selectValidFile}
             disabled={uploadStatus === UPLOAD_STATES.UPLOADING}
             inputLabel={`Pilih file data ${config.subject}`}
+            accept={[".csv"]}
           />
         </div>
 

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import logo from "../../assets/logo-edutrack.svg";
 import { getStoredUser } from "../../stores/authStore";
+import { canViewClassSubjectGrades } from "../../utils/teacherPermissions";
 import SidebarItem from "./SidebarItem";
 
 export function getNavigationItems(user = getStoredUser()) {
@@ -19,27 +20,27 @@ export function getNavigationItems(user = getStoredUser()) {
     return [
       { to: "/student/dashboard", label: "Dashboard", icon: LayoutGrid },
       { to: "/student/grades", label: "Nilai", icon: BarChart3 },
+      { to: "/student/attendance", label: "Presensi", icon: CalendarCheck },
       { to: "/student/report", label: "Rapor", icon: FileText },
       { to: "/student/settings", label: "Pengaturan", icon: Settings },
     ];
-  }
-
-  if (user?.role === "admin") {
-    return [{ to: "/admin/dashboard", label: "Dashboard", icon: LayoutGrid }];
   }
 
   return [
     { to: "/teacher/dashboard", label: "Dashboard", icon: LayoutGrid },
     { to: "/teacher/attendance", label: "Presensi", icon: CalendarCheck },
     { to: "/teacher/grades", label: "Input Nilai", icon: FilePenLine },
-    ...(user?.isHomeroomTeacher
+    ...(canViewClassSubjectGrades(user)
       ? [{ to: "/teacher/subject-grades", label: "Lihat Nilai Mapel", icon: BarChart3 }]
       : []),
     {
       to: "/teacher/reports",
-      label: user?.isHomeroomTeacher ? "Buat Rapor" : "Generate Rapor",
+      label: "Buat Rapor",
       icon: FileChartColumn,
     },
+    ...(user?.isHomeroomTeacher
+      ? [{ to: "/teacher/homeroom/reports", label: "Rapor Semester", icon: FileText }]
+      : []),
     { to: "/teacher/account", label: "Akun", icon: UserRound },
   ];
 }

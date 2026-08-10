@@ -23,6 +23,8 @@ import {
   saveLearningTopics,
 } from "../../services/gradeService";
 import { clearGradeDraft } from "../../stores/gradeStore";
+import { getStoredUser } from "../../stores/authStore";
+import { getTeacherClasses } from "../../services/teacherService";
 import {
   hasIncompleteGrades,
   validateAssessmentWeights,
@@ -45,6 +47,7 @@ function cloneGrades(grades) {
 export default function TeacherGradesPage() {
   const topicButtonRef = useRef(null);
   const [filters, setFilters] = useState(initialFilters);
+  const [assignments, setAssignments] = useState(teacherUser.assignedClasses);
   const [sheet, setSheet] = useState(null);
   const [savedGrades, setSavedGrades] = useState({});
   const [draftGrades, setDraftGrades] = useState({});
@@ -66,9 +69,18 @@ export default function TeacherGradesPage() {
   const locked = sheet?.status === GRADE_STATUSES.FINALIZED_SUBJECT;
 
   const selectedAssignment = useMemo(
-    () => teacherUser.assignedClasses.find((item) => item.id === filters.classId),
-    [filters.classId],
+    () => assignments.find((item) => item.id === filters.classId) || assignments[0],
+    [assignments, filters.classId],
   );
+
+  useEffect(() => {
+    getTeacherClasses().then((items) => {
+      if (!items.length) return;
+      setAssignments(items);
+      const first = items[0];
+      setFilters({ classId: first.id, subjectId: first.subjectId, academicYear: first.academicYear, semester: String(first.semester).toUpperCase() });
+    }).catch(() => {});
+  }, []);
 
   const sortedStudents = useMemo(() => {
     const students = [...(sheet?.students || [])];
@@ -294,6 +306,7 @@ export default function TeacherGradesPage() {
             onChange={handleFilterChange}
             onShow={loadGradeSheet}
             loading={loading || isEditing || isSaving}
+            assignments={assignments}
           />
         </div>
 
@@ -342,7 +355,7 @@ export default function TeacherGradesPage() {
           />
         )}
 
-        {teacherUser.isHomeroomTeacher && (
+        {getStoredUser()?.isHomeroomTeacher && selectedAssignment && (
           <HomeroomInformation className={selectedAssignment.name} />
         )}
       </div>
